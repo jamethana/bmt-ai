@@ -1,0 +1,63 @@
+---
+description: Enforce skeleton loading states for every async component
+globs: **/*.tsx
+alwaysApply: false
+---
+
+# Loading States
+
+Every component that fetches async data **must** implement a skeleton loading state.
+
+## Required pattern
+
+```tsx
+// ✅ GOOD
+const [data, setData] = useState<T | null>(null);
+const [isLoading, setIsLoading] = useState(true);
+const [error, setError] = useState<Error | null>(null);
+
+if (isLoading) return <SessionCardSkeleton />;
+if (error) return <ErrorState message={error.message} />;
+```
+
+```tsx
+// ❌ BAD — renders nothing while loading
+const [data, setData] = useState<T | null>(null);
+useEffect(() => { fetch().then(setData); }, []);
+if (!data) return null;
+```
+
+## Skeleton components
+
+Use the Shadcn `<Skeleton>` primitive to build skeleton variants. Name them `<ComponentNameSkeleton>` and colocate with the component.
+
+```tsx
+import { Skeleton } from "@/components/ui/skeleton";
+
+export function SessionCardSkeleton() {
+  return (
+    <div className="p-4 space-y-2">
+      <Skeleton className="h-4 w-3/4" />
+      <Skeleton className="h-4 w-1/2" />
+    </div>
+  );
+}
+```
+
+## Supabase queries
+
+Always destructure `{ data, error }` and track loading state explicitly:
+
+```tsx
+const { data, error, isLoading } = useQuery(...);
+// or with raw supabase client:
+setIsLoading(true);
+const { data, error } = await supabase.from("sessions").select("*");
+setIsLoading(false);
+```
+
+## Rule
+
+- Every `async` data fetch → paired loading + error state
+- Every loading state → Shadcn `<Skeleton>` (not a spinner, not `null`)
+- No component renders `null` as its only loading representation

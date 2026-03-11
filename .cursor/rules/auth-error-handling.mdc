@@ -1,0 +1,79 @@
+---
+description: Line + Supabase auth flow requirements and error handling
+globs: "**/{auth,api}/**"
+alwaysApply: false
+---
+
+# Auth Error Handling
+
+## Line → Supabase OAuth flow
+
+```
+User clicks "Login with Line"
+  → Redirect to Line authorization URL (with state + PKCE code_verifier)
+  → Line redirects to NEXT_PUBLIC_LINE_CALLBACK_URL (/api/auth/callback)
+  → Callback: validate state param, exchange Line code for Line access token
+  → Use Line access token to create/sign-in Supabase user
+  → Redirect to app
+```
+
+**Note:** This is a custom flow — do NOT use `supabase.auth.signInWithOAuth()` for Line.
+
+## Callback route requirements
+
+Every `/api/auth/callback` handler must:
+
+```ts
+// 1. Check for error from Line
+const error = searchParams.get("error");
+if (error) {
+  redirect(`/auth/error?reason=${error}`);
+}
+
+// 2. Validate state param (CSRF protection)
+const state = searchParams.get("state");
+const storedState = cookies().get("oauth_state")?.value;
+if (!state || state !== storedState) {
+  redirect("/auth/error?reason=state_mismatch");
+}
+
+// 3. Exchange code (expires in 10 minutes)
+const code = searchParams.get("code");
+if (!code) {
+  redirect("/auth/error?reason=missing_code");
+}
+```
+
+## Server-side API routes
+
+Always verify session before reading user:
+
+```ts
+// ✅ GOOD
+const { data: { session } } = await supabase.auth.getSession();
+if (!session) return NextResponse.json({ error: { code: "UNAUTHORIZED" } }, { status: 401 });
+const userId = session.user.id;
+
+// ❌ BAD
+const { data: { user } } = await supabase.auth.getUser(); // may return null without redirect
+```
+
+## Redirect URI
+
+`NEXT_PUBLIC_LINE_CALLBACK_URL` must exactly match the URL registered in Line Developer Console — including protocol, domain, and path. Any mismatch causes a silent auth failure.
+
+## Local dev bypass
+
+`TEST_MODE_AUTH_BYPASS=true` in `.env.local` skips the Line auth flow for local development. This flag must never be set in production. API routes must check:
+
+```ts
+if (process.env.TEST_MODE_AUTH_BYPASS === "true" && process.env.NODE_ENV !== "production") {
+  // use test user
+}
+```
+
+## Rule
+
+- Every auth callback → validates state, handles error param, handles missing/expired code
+- Every API route → checks session before reading user
+- Never assume authenticated state without verification

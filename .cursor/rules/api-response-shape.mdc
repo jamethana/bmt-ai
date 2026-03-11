@@ -1,0 +1,78 @@
+---
+description: Consistent API response shape with requestId for all routes
+globs: "**/api/**"
+alwaysApply: false
+---
+
+# API Response Shape
+
+All API routes must use the response shapes defined in `docs/DESIGN.md`.
+
+## Success response
+
+```ts
+return NextResponse.json({
+  data: payload,
+  requestId: requestId,
+});
+```
+
+## Error response
+
+```ts
+return NextResponse.json(
+  {
+    error: {
+      code: "NOT_FOUND",        // from the error code enum below
+      message: "Session not found",
+      details: { sessionId },   // optional, helpful for debugging
+    },
+    requestId: requestId,
+  },
+  { status: 404 }
+);
+```
+
+## Error codes
+
+| Code | HTTP Status | When to use |
+|---|---|---|
+| `UNAUTHORIZED` | 401 | No valid session |
+| `FORBIDDEN` | 403 | Authenticated but not permitted |
+| `NOT_FOUND` | 404 | Resource doesn't exist |
+| `CONFLICT` | 409 | Duplicate or state conflict |
+| `VALIDATION_ERROR` | 422 | Invalid request body/params |
+| `INTERNAL_ERROR` | 500 | Unexpected server error |
+| `DEPENDENCY_ERROR` | 502 | Supabase or external service failed |
+| `RATE_LIMITED` | 429 | Too many requests |
+
+## requestId middleware
+
+`requestId` must be generated in middleware and attached to every request context:
+
+```ts
+// middleware.ts
+const requestId = crypto.randomUUID();
+requestHeaders.set("x-request-id", requestId);
+```
+
+Then in route handlers:
+
+```ts
+const requestId = request.headers.get("x-request-id") ?? crypto.randomUUID();
+```
+
+## Logging
+
+Every error response must log before returning:
+
+```ts
+logger.error("Session not found", { requestId, sessionId, userId });
+```
+
+## Rule
+
+- Every API route → returns `{ data, requestId }` or `{ error: { code, message }, requestId }`
+- Every error → uses a code from the enum above
+- Every error response → logged before returning
+- Never return unstructured error strings

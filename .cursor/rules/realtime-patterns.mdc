@@ -1,0 +1,80 @@
+---
+description: Enforce Supabase Realtime subscriptions for multi-user shared data
+globs: "**/*.tsx,**/hooks/**"
+alwaysApply: false
+---
+
+# Realtime Patterns
+
+Any data that multiple users can mutate **must** use Supabase Realtime — not just a one-time fetch.
+
+## Tables requiring realtime
+
+- `sessions` — status changes, player count
+- `session_players` — players joining/leaving
+- `pairings` — court assignments, match status
+- `game_results` — scores recorded by any player
+
+## Required subscription pattern
+
+```tsx
+useEffect(() => {
+  // Initial fetch
+  fetchData();
+
+  // Realtime subscription
+  const channel = supabase
+    .channel(`session:${sessionId}:pairings`)
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "pairings", filter: `session_id=eq.${sessionId}` },
+      (payload) => {
+        if (payload.eventType === "INSERT") addPairing(payload.new);
+        if (payload.eventType === "UPDATE") updatePairing(payload.new);
+        if (payload.eventType === "DELETE") removePairing(payload.old.id);
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, [sessionId]);
+```
+
+## Channel naming convention
+
+```
+session:{sessionId}:{tableName}
+```
+
+Examples: `session:abc123:pairings`, `session:abc123:players`
+
+## Handle all three events
+
+Always handle `INSERT`, `UPDATE`, and `DELETE` — never just INSERT.
+
+## Debounce high-frequency updates
+
+For the court dashboard (many events in quick succession), debounce re-renders:
+
+```tsx
+const debouncedRefetch = useMemo(
+  () => debounce(() => refetch(), 200),
+  [refetch]
+);
+```
+
+## RLS requirement
+
+For `UPDATE` and `DELETE` events to include old row data, tables must have:
+
+```sql
+ALTER TABLE pairings REPLICA IDENTITY FULL;
+```
+
+## Rule
+
+- One-time `useEffect` fetch for shared data → add a Realtime subscription
+- Every subscription → cleaned up in the `useEffect` return function
+- Every subscription → handles INSERT, UPDATE, DELETE
