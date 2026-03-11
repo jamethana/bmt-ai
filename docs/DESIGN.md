@@ -41,7 +41,7 @@ The design explicitly optimizes for **AI-agent debuggability**:
 
 **Session**
 
-- **Fields:** `id`, `name`, `date`, `startTime`, `endTime`, `location`, `numCourts`, `maxPlayers`, `status` (`draft` | `active` | `completed` | `cancelled`), `courtNames` (map courtNumber → name), `notes`, permission flags (`allowPlayerAssignEmptyCourt`, `allowPlayerRecordOwnResult`, `allowPlayerRecordAnyResult`, `allowPlayerModifyCourts`, `allowPlayerAccessInviteLink`), `createdByUserId`, `createdAt`, `updatedAt`.
+- **Fields:** `id`, `name`, `date`, `startTime`, `endTime`, `location`, `numCourts`, `maxPlayers`, `status` (`draft` | `active` | `completed` | `cancelled`), `courtNames` (map courtNumber → name), `notes`, permission flags (`allowPlayerAssignEmptyCourt`, `allowPlayerRecordOwnResult`, `allowPlayerRecordAnyResult`, `allowPlayerModifyCourts`, `allowPlayerAccessInviteLink`), `pairingRule` (`leastPlayed` | `LongestWait` | `Mixed`), `maxPartnerSkillLevelGap`, `createdByUserId`, `createdAt`, `updatedAt`.
 
 **SessionPlayer**
 
@@ -234,5 +234,77 @@ Include in the repo:
   config/
     openapi.yaml
 ```
-
 An AI agent can use this design to scaffold types and entities, implement repositories and adapters, wire application use cases and API routes, add tests and logging, and iterate while staying aligned with the documented contracts and flows.
+
+---
+
+## 11. Development & agent workflow
+
+This section defines how an AI coding agent (and its sub-agents) should work on this repo.
+
+### 11.1 Roles / “agents”
+
+- **Orchestrator / Planner**
+  - Reads `DESIGN.md` and any feature request.
+  - Clarifies requirements, identifies affected areas, and breaks work into steps.
+  - Updates docs when behavior or contracts change.
+
+- **Backend + Supabase specialist**
+  - Owns `src/domain`, `src/application`, and backend parts of `src/infrastructure` (DB, auth, logging, Supabase).
+  - Implements use cases, repositories, and API handlers under `app/api`.
+  - Keeps DB schemas, RLS rules, and application logic consistent with the domain model.
+
+- **Frontend + UX specialist**
+  - Owns React/Next.js routes in `app/` and shared UI in `src/ui`.
+  - Implements screens and components for moderator/player flows.
+  - Applies performance and accessibility best practices (per React/Next.js guidelines).
+
+- **Infra / Vercel specialist**
+  - Owns deployment- and environment-related configuration (Vercel project settings, environment variables, build settings).
+  - Investigates build/runtime issues in deployed environments and keeps local vs deployed configs aligned.
+
+- **Debug / Review specialist**
+  - Runs tests, inspects logs, and performs focused code review before merging large or risky changes.
+  - Confirms that behavior matches design and that observability hooks (logging, requestId, error codes) remain intact.
+
+Specialized concerns like **Line auth**, **Supabase Realtime**, or **Postgres performance** should generally be treated as *skills/modes* of the backend/infra specialists, not separate long‑running agents.
+
+### 11.2 Standard development flow
+
+For any non‑trivial change, follow this flow:
+
+1. **Plan**
+   - Orchestrator reads the request and relevant docs.
+   - Define the change as a small list of steps (backend, frontend, infra as needed).
+   - Update or extend `DESIGN.md` / `ARCHITECTURE.md` *first* if the change alters contracts, entities, or flows.
+
+2. **Implement backend (if applicable)**
+   - Backend specialist changes domain/application/infrastructure code and any `app/api` routes.
+   - Keep APIs contract-driven; update `openapi.yaml` when endpoint shapes change.
+   - Add or update unit/integration tests covering new or changed behaviors.
+
+3. **Implement frontend (if applicable)**
+   - Frontend specialist builds or updates pages/components against the documented APIs.
+   - Wire UI to call the correct endpoints and display errors using error codes/requestId where relevant.
+   - Consider UX and accessibility, especially for core moderator/player flows.
+
+4. **Auth / security pass (when relevant)**
+   - If changes touch login, session management, or permissions:
+     - Re-check Line OAuth + Supabase auth flows.
+     - Re-validate permission helpers (e.g. `canAssignCourt`, `canRecordOwnResult`) against new behavior.
+     - Ensure RLS rules (documented in `RLS.md`) still enforce intended access patterns.
+
+5. **Test & debug**
+   - Run unit/integration/E2E tests relevant to the change.
+   - Use structured logging and `requestId` to trace and fix issues.
+   - Let the Debug/Review specialist propose refactors if code becomes complex or duplicates logic.
+
+6. **Review & document**
+   - Summarize the change (what/why) in commit messages and, if needed, in `DEBUGGING.md` (for tricky failure modes).
+   - Ensure docs and OpenAPI remain in sync with the implemented behavior.
+
+7. **Deploy & verify**
+   - Infra/Vercel specialist verifies build, environment variables, and runtime logs.
+   - Spot-check the main flows in the deployed environment (especially those touched by the change).
+
+This workflow is intentionally linear and explicit so that an AI agent can pick up any step, understand context quickly, and make safe, debuggable changes that stay aligned with the domain and product design.
