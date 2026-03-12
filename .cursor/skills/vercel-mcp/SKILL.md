@@ -9,9 +9,9 @@ Use the **Vercel MCP** for deployment status and logs instead of the CLI. Call t
 
 ## This repository’s Vercel project
 
-- **Dashboard**: [jamethana-bmt](https://vercel.com/jamethanas-projects/jamethana-bmt)
+- **Dashboard**: [bmt](https://vercel.com/jamethanas-projects/bmt)
 - **Team slug** (use as `teamId`): `jamethanas-projects`
-- **Project slug** (use as `projectId`): `jamethana-bmt`
+- **Project slug** (use as `projectId`): `bmt`
 
 For tools that require `teamId` and `projectId`, use these slugs unless `.vercel/project.json` or MCP discovery returns different values.
 
@@ -19,7 +19,7 @@ For tools that require `teamId` and `projectId`, use these slugs unless `.vercel
 
 Most tools need `teamId` and often `projectId`. Resolve them in this order:
 
-1. **This repo**: Use `teamId: "jamethanas-projects"`, `projectId: "jamethana-bmt"` (see above).
+1. **This repo**: Use `teamId: "jamethanas-projects"`, `projectId: "bmt"` (see above).
 2. **From repo**: Read `.vercel/project.json` if present for `projectId` and `orgId` (as `teamId`). The folder is gitignored; it exists after `vercel link`.
 3. **From MCP**: Call `list_teams` (no args), then `list_projects` with `teamId` to get project IDs.
 

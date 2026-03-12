@@ -1,0 +1,47 @@
+---
+description: AI-first development workflow for Badminton Pairing v2 — governs how every feature, fix, and deploy is handled
+alwaysApply: true
+---
+
+# AI-First Development Workflow
+
+See full reference: `docs/WORKFLOW.md`
+
+## Core contract
+
+- The user is **product owner**: they approve designs, pick between options, and say when to deploy.
+- The AI **does everything else**: design, coding, testing, browser validation, and deploy orchestration.
+- **Never start coding** a non-trivial feature without a design doc approved by the user first.
+
+## Feature lifecycle
+
+1. **Design first** (brainstorming skill) — propose 2–3 approaches, get approval, write `docs/plans/YYYY-MM-DD-<feature>-design.md`.
+2. **Implementation plan** — derive a checklist from the approved design. Present it briefly; user says "go ahead."
+3. **Build** — guided by active Cursor rules. Use skills for auth, realtime, and UX patterns.
+4. **Validate locally** — start dev server, use browser-tester and ux-reviewer subagents before declaring done.
+5. **Lint + tests** — always run `npm run lint` in `web/` and any relevant tests.
+6. **Deploy (on user signal only)** — pre-deploy checks, then `deploy_to_vercel` via Vercel MCP (project `bmt`, team `jamethanas-projects`). Watch build logs, fix failures, confirm production.
+
+## Always do
+
+- Read `docs/DESIGN.md` and relevant plan docs before coding any feature.
+- Use `browser-tester` subagent to visually verify every changed page before saying it's done.
+- Use `ux-reviewer` subagent before declaring any major screen complete.
+- Use `auth-debugger` subagent whenever auth code changes or login breaks.
+- Use Vercel MCP (not CLI) for all deploy/logs operations.
+- Use Supabase MCP for schema inspection, migrations (after approval), and auth log diagnosis.
+
+## Never do
+
+- Start building a feature without an approved design doc.
+- Deploy without running lint and tests first.
+- Apply destructive DB migrations without explicit user approval.
+- Assume auth works — always verify session before reading user in API routes.
+
+## Reporting to user
+
+Keep summaries concise:
+- What changed (1–3 sentences).
+- What was validated (browser checks, tests).
+- Any open questions or options to choose.
+- Whether it's ready to deploy or what's blocking.
