@@ -79,3 +79,4 @@ The user will tell you which page or feature to review. Navigate to it using the
 - Web design guidelines skill: `.cursor/skills/web-design-guidelines/SKILL.md`
 - Loading states rule: `.cursor/rules/loading-states.mdc`
 - Realtime patterns rule: `.cursor/rules/realtime-patterns.mdc`
+- UI UX Pro Max design system skill: `.cursor/skills/ui-ux-pro-max/SKILL.md`
