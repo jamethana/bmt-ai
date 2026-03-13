@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/src/ui/auth/AuthContext";
+import { HeaderAuth } from "@/src/ui/layout/HeaderAuth";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,36 +30,33 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-950 text-slate-50`}
       >
-        <div className="min-h-screen bg-slate-950 text-slate-50">
-          <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur">
-            <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-emerald-500 text-sm font-bold text-slate-950">
-                  BP
-                </span>
-                <div className="flex flex-col leading-tight">
-                  <span className="text-sm font-semibold">
-                    Badminton Pairing v2
+        <AuthProvider>
+          <div className="min-h-screen bg-slate-950 text-slate-50">
+            <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur">
+              <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-emerald-500 text-sm font-bold text-slate-950">
+                    BP
                   </span>
-                  <span className="text-xs text-slate-400">
-                    Session control for moderators
-                  </span>
+                  <div className="flex flex-col leading-tight">
+                    <span className="text-sm font-semibold">
+                      Badminton Pairing v2
+                    </span>
+                    <span className="text-xs text-slate-400">
+                      Session control for moderators
+                    </span>
+                  </div>
                 </div>
+                <nav className="flex items-center gap-4 text-xs sm:text-sm">
+                  <HeaderAuth />
+                </nav>
               </div>
-              <nav className="flex items-center gap-4 text-xs sm:text-sm">
-                <span className="hidden text-slate-400 sm:inline">
-                  Moderator
-                </span>
-                <button className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-100 shadow-sm hover:border-emerald-500 hover:bg-slate-900/80">
-                  Login with Line
-                </button>
-              </nav>
-            </div>
-          </header>
-          <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
-            {children}
-          </main>
-        </div>
+            </header>
+            <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+              {children}
+            </main>
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );
