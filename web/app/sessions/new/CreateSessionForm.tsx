@@ -34,7 +34,7 @@ export function CreateSessionForm({ defaults }: { defaults?: DefaultSettings }) 
   const today = format(new Date(), "yyyy-MM-dd");
 
   const [form, setForm] = useState({
-    name: defaults?.name ?? "Badminton Session",
+    name: defaults?.name ?? "",
     date: today,
     startTime: defaults?.start_time ?? "09:00",
     endTime: defaults?.end_time ?? "12:00",
@@ -43,7 +43,7 @@ export function CreateSessionForm({ defaults }: { defaults?: DefaultSettings }) 
     maxPlayers: defaults?.max_players ?? 24,
     notes: "",
     pairingRule: defaults?.pairing_rule ?? "balanced",
-    maxPartnerSkillLevelGap: defaults?.max_partner_skill_level_gap ?? 10,
+    maxPartnerSkillLevelGap: defaults?.max_partner_skill_level_gap ?? 2,
     allowPlayerAssignEmptyCourt: defaults?.allow_player_assign_empty_court ?? false,
     allowPlayerRecordOwnResult: defaults?.allow_player_record_own_result ?? false,
     allowPlayerRecordAnyResult: defaults?.allow_player_record_any_result ?? false,
@@ -279,26 +279,75 @@ export function CreateSessionForm({ defaults }: { defaults?: DefaultSettings }) 
       </div>
 
       {/* Player Permissions */}
-      <div className="space-y-3 rounded-md border border-border bg-card p-4 shadow-sm">
+      <div className="space-y-4 rounded-md border border-border bg-card p-4 shadow-sm">
         <h2 className="text-sm font-medium text-foreground">Player Permissions</h2>
+        <p className="text-[11px] text-muted-foreground/80">
+          Decide what players can do themselves during a session. Tap a card to enable or disable each permission.
+        </p>
 
-        {[
-          { key: "allowPlayerAssignEmptyCourt" as const, label: "Allow players to assign themselves to empty courts" },
-          { key: "allowPlayerRecordOwnResult" as const, label: "Allow players to record their own match result" },
-          { key: "allowPlayerRecordAnyResult" as const, label: "Allow players to record any match result" },
-          { key: "allowPlayerAddRemoveCourts" as const, label: "Allow players to add/remove courts" },
-          { key: "allowPlayerAccessInviteQr" as const, label: "Allow players to access the invite QR code" },
-          { key: "showSkillLevelPills" as const, label: "Show skill level pills on player cards" },
-        ].map(({ key, label }) => (
-          <div key={key} className="flex items-center justify-between gap-4">
-            <Label htmlFor={key} className="text-xs text-muted-foreground cursor-pointer flex-1 min-w-0">{label}</Label>
-            <Switch
-              id={key}
-              checked={form[key]}
-              onCheckedChange={v => set(key, v)}
-            />
-          </div>
-        ))}
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {[
+            {
+              key: "allowPlayerAssignEmptyCourt" as const,
+              label: "Assign to empty courts",
+              description: "Players can put themselves onto any empty court.",
+            },
+            {
+              key: "allowPlayerRecordOwnResult" as const,
+              label: "Record their own result",
+              description: "Players can submit scores for matches they played in.",
+            },
+            {
+              key: "allowPlayerRecordAnyResult" as const,
+              label: "Record any match result",
+              description: "Players can record scores for any court, not just their own.",
+            },
+            {
+              key: "allowPlayerAddRemoveCourts" as const,
+              label: "Add/remove courts",
+              description: "Players can change the number of active courts.",
+            },
+            {
+              key: "allowPlayerAccessInviteQr" as const,
+              label: "Access invite QR code",
+              description: "Players can open the QR code / invite link screen.",
+            },
+            {
+              key: "showSkillLevelPills" as const,
+              label: "Show skill level pills",
+              description: "Display each player’s skill level on their card.",
+            },
+          ].map(option => {
+            const isEnabled = form[option.key];
+            return (
+              <button
+                key={option.key}
+                type="button"
+                onClick={() => set(option.key, !isEnabled)}
+                aria-pressed={isEnabled}
+                className={cn(
+                  "min-h-[52px] rounded-lg border px-3 py-2 text-left text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                  "sm:min-h-[56px]",
+                  isEnabled
+                    ? "border-emerald-500 bg-emerald-500/10 text-emerald-900 dark:text-emerald-300"
+                    : "border-border bg-secondary/60 text-muted-foreground hover:bg-secondary"
+                )}
+              >
+                <span
+                  className={cn(
+                    "block font-medium",
+                    isEnabled ? "text-emerald-700 dark:text-emerald-300" : "text-foreground"
+                  )}
+                >
+                  {option.label}
+                </span>
+                <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                  {option.description}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Status + Submit */}
