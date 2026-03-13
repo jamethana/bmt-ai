@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Link from "next/link";
 import { AuthProvider } from "@/src/ui/auth/AuthContext";
 import { HeaderAuth } from "@/src/ui/layout/HeaderAuth";
 
@@ -48,6 +49,9 @@ export default function RootLayout({
                   </div>
                 </div>
                 <nav className="flex items-center gap-4 text-xs sm:text-sm">
+                  <Link href="/sessions" className="text-slate-400 hover:text-slate-200 transition-colors">
+                    Sessions
+                  </Link>
                   <HeaderAuth />
                 </nav>
               </div>
