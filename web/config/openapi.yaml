@@ -1,0 +1,313 @@
+openapi: "3.1.0"
+info:
+  title: Badminton Pairing v2 API
+  version: "1.0.0"
+  description: API for managing badminton sessions, pairings, and results.
+
+servers:
+  - url: /api
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: bmt_session
+
+  schemas:
+    RequestId:
+      type: string
+      format: uuid
+
+    ApiSuccess:
+      type: object
+      required: [data, requestId]
+      properties:
+        data:
+          description: Response payload
+        requestId:
+          $ref: "#/components/schemas/RequestId"
+
+    ApiError:
+      type: object
+      required: [error, requestId]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              enum: [UNAUTHORIZED, FORBIDDEN, NOT_FOUND, CONFLICT, VALIDATION_ERROR, INTERNAL_ERROR, DEPENDENCY_ERROR, RATE_LIMITED]
+            message:
+              type: string
+            details:
+              type: object
+        requestId:
+          $ref: "#/components/schemas/RequestId"
+
+    Session:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        date: { type: string, format: date }
+        start_time: { type: string }
+        end_time: { type: string }
+        location: { type: string, nullable: true }
+        num_courts: { type: integer }
+        max_players: { type: integer }
+        status: { type: string, enum: [draft, active, completed, cancelled] }
+        court_names: { type: object, additionalProperties: { type: string } }
+        pairing_rule: { type: string, enum: [least_played, longest_wait, balanced] }
+        max_partner_skill_level_gap: { type: integer, minimum: 1, maximum: 10 }
+        show_skill_level_pills: { type: boolean }
+        allow_player_assign_empty_court: { type: boolean }
+        allow_player_record_own_result: { type: boolean }
+        allow_player_record_any_result: { type: boolean }
+        allow_player_add_remove_courts: { type: boolean }
+        allow_player_access_invite_qr: { type: boolean }
+        created_by: { type: string, format: uuid, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    Pairing:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        session_id: { type: string, format: uuid }
+        court_number: { type: integer }
+        sequence_number: { type: integer }
+        status: { type: string, enum: [scheduled, in_progress, completed, voided] }
+        team_a_player1: { type: string, format: uuid, nullable: true }
+        team_a_player2: { type: string, format: uuid, nullable: true }
+        team_b_player1: { type: string, format: uuid, nullable: true }
+        team_b_player2: { type: string, format: uuid, nullable: true }
+        created_at: { type: string, format: date-time }
+        completed_at: { type: string, format: date-time, nullable: true }
+
+    GameResult:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        pairing_id: { type: string, format: uuid }
+        team_a_score: { type: integer }
+        team_b_score: { type: integer }
+        winner_team: { type: string, enum: [teamA, teamB] }
+        recorded_by: { type: string, format: uuid, nullable: true }
+        recorded_at: { type: string, format: date-time }
+
+security:
+  - cookieAuth: []
+
+paths:
+  /auth/me:
+    get:
+      summary: Get current authenticated user
+      responses:
+        "200":
+          description: Current user
+        "401":
+          description: Not authenticated
+
+  /auth/logout:
+    post:
+      summary: Logout (clear session cookie)
+      responses:
+        "302":
+          description: Redirect to /
+
+  /auth/callback:
+    get:
+      summary: Line OAuth callback — exchanges code for session
+      parameters:
+        - in: query
+          name: code
+          schema: { type: string }
+          required: true
+      responses:
+        "302":
+          description: Redirect to / on success
+
+  /sessions:
+    get:
+      summary: List all sessions (authenticated)
+      responses:
+        "200":
+          description: Array of sessions
+    post:
+      summary: Create a new session (moderator only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, date, startTime, endTime, numCourts, maxPlayers]
+              properties:
+                name: { type: string }
+                date: { type: string, format: date }
+                startTime: { type: string }
+                endTime: { type: string }
+                location: { type: string }
+                numCourts: { type: integer }
+                maxPlayers: { type: integer }
+                pairingRule: { type: string, enum: [least_played, longest_wait, balanced] }
+                maxPartnerSkillLevelGap: { type: integer }
+                status: { type: string, enum: [draft, active] }
+      responses:
+        "201":
+          description: Created session
+        "400":
+          description: Validation error
+        "403":
+          description: Not a moderator
+
+  /sessions/{sessionId}:
+    get:
+      summary: Get session details
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Session
+        "404":
+          description: Not found
+    patch:
+      summary: Update session (moderator only)
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Updated session
+
+  /sessions/{sessionId}/players:
+    get:
+      summary: List session players
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Array of session players with user info
+    post:
+      summary: Join session (current user)
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "201":
+          description: Joined
+        "409":
+          description: Session full or closed
+
+  /sessions/{sessionId}/pairings:
+    get:
+      summary: List pairings for a session
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Array of pairings with results
+    post:
+      summary: Create pairing (auto or manual, moderator only)
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  required: [mode, courtNumber]
+                  properties:
+                    mode: { type: string, enum: [auto] }
+                    courtNumber: { type: integer }
+                - type: object
+                  required: [mode, courtNumber, teamAPlayer1, teamAPlayer2, teamBPlayer1, teamBPlayer2]
+                  properties:
+                    mode: { type: string, enum: [manual] }
+                    courtNumber: { type: integer }
+                    teamAPlayer1: { type: string, format: uuid }
+                    teamAPlayer2: { type: string, format: uuid }
+                    teamBPlayer1: { type: string, format: uuid }
+                    teamBPlayer2: { type: string, format: uuid }
+      responses:
+        "201":
+          description: Created pairing
+        "409":
+          description: Not enough players / session not active
+
+  /pairings/{pairingId}:
+    get:
+      summary: Get pairing details
+      parameters:
+        - in: path
+          name: pairingId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Pairing with optional result
+    patch:
+      summary: Update pairing status (moderator only)
+      parameters:
+        - in: path
+          name: pairingId
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [in_progress, completed, voided] }
+      responses:
+        "200":
+          description: Updated pairing
+
+  /pairings/{pairingId}/results:
+    post:
+      summary: Record game result (permission-gated)
+      parameters:
+        - in: path
+          name: pairingId
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [teamAScore, teamBScore]
+              properties:
+                teamAScore: { type: integer, minimum: 0 }
+                teamBScore: { type: integer, minimum: 0 }
+      responses:
+        "201":
+          description: Recorded result
+        "403":
+          description: Not allowed
+        "409":
+          description: Result already exists
