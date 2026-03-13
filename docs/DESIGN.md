@@ -41,7 +41,11 @@ The design explicitly optimizes for **AI-agent debuggability**:
 
 **Session**
 
-- **Fields:** `id`, `name`, `date`, `startTime`, `endTime`, `location`, `numCourts`, `maxPlayers`, `status` (`draft` | `active` | `completed` | `cancelled`), `courtNames` (map courtNumber → name), `notes`, permission flags (`allowPlayerAssignEmptyCourt`, `allowPlayerRecordOwnResult`, `allowPlayerRecordAnyResult`, `allowPlayerModifyCourts`, `allowPlayerAccessInviteLink`), `pairingRule` (`leastPlayed` | `LongestWait` | `Mixed`), `maxPartnerSkillLevelGap`, `createdByUserId`, `createdAt`, `updatedAt`.
+- **Fields:** `id`, `name`, `date`, `startTime`, `endTime`, `location`, `numCourts`, `maxPlayers`, `status` (`draft` | `active` | `completed` | `cancelled`), `courtNames` (map courtNumber → name), `notes`, permission flags (`allowPlayerAssignEmptyCourt`, `allowPlayerRecordOwnResult`, `allowPlayerRecordAnyResult`, `allowPlayerModifyCourts`, `allowPlayerAccessInviteLink`), `pairingRule` (`least_played` | `longest_wait` | `balanced`), `maxPartnerSkillLevelGap` (1–10; 10 = no restriction), `createdByUserId`, `createdAt`, `updatedAt`.
+- **Pairing rule options:**
+  - `least_played` — fairness-first: prioritise players with fewest matches played.
+  - `longest_wait` — wait-time-first: prioritise players sitting out the longest.
+  - `balanced` — default; blends fairness and wait time equally.
 
 **SessionPlayer**
 
@@ -60,7 +64,7 @@ The design explicitly optimizes for **AI-agent debuggability**:
 
 **ModeratorDefaultSettings**
 
-- **Fields:** `id`, `moderatorUserId`, default values for new sessions (name, start/end time, location, numCourts, maxPlayers, permission flags).
+- **Fields:** `id`, `moderatorUserId`, default values for new sessions (name, start/end time, location, numCourts, maxPlayers, permission flags, `pairingRule`, `maxPartnerSkillLevelGap`).
 - **Notes:** Used to prefill session creation form.
 
 ---
@@ -133,17 +137,43 @@ Maintain an **OpenAPI 3** spec for all endpoints so an AI agent and tooling can 
 
 For a session: `activePlayers` (with ratings and session stats), `existingPairings` (with results). Derived per player: `matchesPlayed`, `wins`/`losses`, `gamesSinceLastPlayed`, `pastPartners`, `pastOpponents`.
 
-### 6.3 Algorithm sketch
+### 6.3 Algorithm design
 
-1. Filter available players (exclude those in an in-progress pairing).
-2. Compute per-player stats from history.
-3. Sort by priority: higher `gamesSinceLastPlayed` first, then lower `matchesPlayed`.
-4. Take top N candidates (e.g. 8–12) to limit search.
-5. Enumerate 4-player combinations; for each, evaluate team splits (A vs B).
-6. Score assignments: + fairness (include long-waiting players), − repeated partners/opponents, − rating imbalance.
-7. Return best assignment (or null if &lt; 4 available).
+**Key principle:** The moderator's goal is for everyone to have fun. Players get frustrated when they (a) play too little, (b) wait too long, (c) face a lopsided skill mismatch, or (d) keep playing with the same people. The algorithm balances all four concerns simultaneously.
 
-Implement as a **pure, deterministic** function (optional RNG seed) so it is easy to unit-test and safe for an AI to refactor.
+**Scoring model:** Every candidate assignment is scored 0–1 using four independently-normalised signals combined with rule-specific weights:
+
+| Signal | What it measures | Normalisation |
+|---|---|---|
+| `wait` | Sum of `gamesSinceLastPlayed` for the 4 players, amplified exponentially (long waits matter more than linearly) | Divided by max wait in pool |
+| `fairness` | Inverse of total matches played (less-played = higher score) | Divided by max played in pool |
+| `balance` | How close the two team rating sums are | Normalised by the realistic max team-sum gap in pool |
+| `variety` | Penalises repeated partners (×2 weight) and opponents (×1), using counts not booleans | Capped at 8 repeat-units = 0 |
+
+Normalising before weighting prevents any single signal from dominating (e.g. raw rating diffs in the thousands would otherwise overwhelm fairness signals in the tens).
+
+**Rule weight profiles** (all sum to 1.0):
+
+| Rule | wait | fairness | balance | variety |
+|---|---|---|---|---|
+| `least_played` | 0.10 | 0.50 | 0.25 | 0.15 |
+| `longest_wait` | 0.50 | 0.15 | 0.20 | 0.15 |
+| `balanced` | 0.25 | 0.25 | 0.30 | 0.20 |
+
+**Full enumeration (no candidate pre-filter):** Sort-then-cut anti-pattern removed. Sorting by one metric then hard-cutting to N candidates prevents the scorer from ever seeing players who'd produce a better balanced game. For badminton sessions (≤30 bench players), C(30,4)×3 splits ≈ 80k score calls — under 5ms in JS.
+
+**Three team splits per combination:** For players (p1,p2,p3,p4) all three distinct splits are evaluated: (12v34), (13v24), (14v23).
+
+**`maxPartnerSkillLevelGap` as a hard filter with graceful fallback:** Violations are skipped. If no valid combination exists (too strict for the pool), the constraint is relaxed rather than returning null — empty courts are worse than a slightly mismatched pairing.
+
+**Steps:**
+
+1. Exclude players currently in an `in_progress` pairing.
+2. Compute per-player stats (matchesPlayed, gamesSinceLastPlayed, partnerHistory, opponentHistory) from session history.
+3. Compute pool-level normalisation context (maxWait, maxMatchesPlayed, maxRatingSpread).
+4. Enumerate all C(n,4) combinations × 3 splits; apply skill-gap filter; score each; return highest-scoring assignment.
+
+Implemented as a **pure, deterministic** function so it is easy to unit-test and safe for an AI to refactor.
 
 ---
 
