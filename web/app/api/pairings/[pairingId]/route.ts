@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { requireModerator } from "@/src/infrastructure/auth/require-auth";
+import { requireAuth, requireModerator } from "@/src/infrastructure/auth/require-auth";
 import { createAdminClient } from "@/src/infrastructure/db/supabase-admin";
 import { apiSuccess, apiError } from "@/src/lib/api-response";
 import { generateRequestId } from "@/src/lib/request-id";
