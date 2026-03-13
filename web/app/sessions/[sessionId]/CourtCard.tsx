@@ -173,20 +173,20 @@ export function CourtCard({ courtNumber, courtName, pairing, playerMap, isModera
               </div>
             )}
 
-            {/* Moderator actions */}
+            {/* Moderator actions — 44px min touch targets for mobile */}
             {isModerator && pairing.status !== "completed" && (
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-2">
                 {pairing.status === "scheduled" && (
-                  <Button size="sm" variant="outline" className="h-7 text-xs border-emerald-700 text-emerald-400 hover:bg-emerald-900/30" disabled={isLoading} onClick={() => updateStatus("in_progress")}>
+                  <Button size="sm" variant="outline" className="min-h-[44px] h-11 text-xs border-emerald-700 text-emerald-400 hover:bg-emerald-900/30" disabled={isLoading} onClick={() => updateStatus("in_progress")}>
                     <Play className="mr-1 h-3 w-3" /> Start
                   </Button>
                 )}
                 {pairing.status === "in_progress" && !pairing.result && (
-                  <Button size="sm" variant="outline" className="h-7 text-xs border-slate-700 text-slate-300" disabled={isLoading} onClick={() => setShowResultForm(true)}>
+                  <Button size="sm" variant="outline" className="min-h-[44px] h-11 text-xs border-slate-700 text-slate-300" disabled={isLoading} onClick={() => setShowResultForm(true)}>
                     <CheckCircle className="mr-1 h-3 w-3" /> Record Result
                   </Button>
                 )}
-                <Button size="sm" variant="outline" className="h-7 text-xs border-red-900 text-red-400 hover:bg-red-900/20" disabled={isLoading} onClick={() => updateStatus("voided")}>
+                <Button size="sm" variant="outline" className="min-h-[44px] h-11 text-xs border-red-900 text-red-400 hover:bg-red-900/20" disabled={isLoading} onClick={() => updateStatus("voided")}>
                   <X className="mr-1 h-3 w-3" /> Void
                 </Button>
               </div>
@@ -204,7 +204,7 @@ export function CourtCard({ courtNumber, courtName, pairing, playerMap, isModera
                       min={0}
                       value={scoreA}
                       onChange={e => setScoreA(e.target.value)}
-                      className="h-7 border-slate-700 bg-slate-700 text-slate-100 text-xs"
+                      className="min-h-[44px] border-slate-700 bg-slate-700 text-slate-100 text-xs"
                       placeholder="0"
                     />
                   </div>
@@ -216,16 +216,16 @@ export function CourtCard({ courtNumber, courtName, pairing, playerMap, isModera
                       min={0}
                       value={scoreB}
                       onChange={e => setScoreB(e.target.value)}
-                      className="h-7 border-slate-700 bg-slate-700 text-slate-100 text-xs"
+                      className="min-h-[44px] border-slate-700 bg-slate-700 text-slate-100 text-xs"
                       placeholder="0"
                     />
                   </div>
                 </div>
-                <div className="flex gap-1.5">
-                  <Button size="sm" className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700" disabled={isLoading} onClick={recordResult}>
+                <div className="flex gap-2">
+                  <Button size="sm" className="min-h-[44px] h-11 text-xs bg-emerald-600 hover:bg-emerald-700" disabled={isLoading} onClick={recordResult}>
                     Submit
                   </Button>
-                  <Button size="sm" variant="ghost" className="h-7 text-xs text-slate-400" onClick={() => { setShowResultForm(false); setError(null); }}>
+                  <Button size="sm" variant="ghost" className="min-h-[44px] h-11 text-xs text-slate-400" onClick={() => { setShowResultForm(false); setError(null); }}>
                     Cancel
                   </Button>
                 </div>
@@ -235,7 +235,7 @@ export function CourtCard({ courtNumber, courtName, pairing, playerMap, isModera
         ) : (
           <div className="flex items-center justify-center py-4">
             {isModerator && (
-              <Button size="sm" variant="outline" className="border-slate-700 text-slate-400 hover:text-slate-200 text-xs" disabled={isLoading} onClick={autoPair}>
+              <Button size="sm" variant="outline" className="min-h-[44px] h-11 border-slate-700 text-slate-400 hover:text-slate-200 text-xs" disabled={isLoading} onClick={autoPair}>
                 <Zap className="mr-1.5 h-3.5 w-3.5" />
                 {isLoading ? "Pairing…" : "Auto-Pair"}
               </Button>

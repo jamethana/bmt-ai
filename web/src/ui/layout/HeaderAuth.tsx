@@ -8,12 +8,23 @@ const LINE_LOGIN_URL = `https://access.line.me/oauth2/v2.1/authorize?response_ty
 export function HeaderAuth() {
   const { user, isLoading, logout } = useAuth();
 
-  if (isLoading) return <div className="h-7 w-24 animate-pulse rounded-full bg-slate-800" />;
+  if (isLoading) {
+    return (
+      <div
+        className="h-8 w-28 animate-pulse rounded-md bg-slate-800"
+        aria-hidden
+      />
+    );
+  }
 
   if (!user) {
     return (
-      <a href={LINE_LOGIN_URL}>
-        <Button variant="outline" size="sm" className="border-slate-700 text-xs">
+      <a href={LINE_LOGIN_URL} className="inline-flex min-h-[44px] items-center">
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-11 min-h-[44px] border-slate-600 bg-slate-800/80 px-4 text-slate-200 hover:bg-slate-700 hover:text-white text-xs"
+        >
           Login with Line
         </Button>
       </a>
@@ -29,7 +40,11 @@ export function HeaderAuth() {
           {user.display_name[0]}
         </AvatarFallback>
       </Avatar>
-      <button onClick={logout} className="text-xs text-slate-400 hover:text-slate-200">
+      <button
+        type="button"
+        onClick={logout}
+        className="min-h-[44px] min-w-[44px] flex items-center justify-center -m-2 text-xs text-slate-400 hover:text-slate-200"
+      >
         Logout
       </button>
     </div>

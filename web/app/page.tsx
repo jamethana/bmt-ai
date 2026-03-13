@@ -45,13 +45,17 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mt-2 rounded-2xl border border-dashed border-slate-800 bg-slate-900/40 p-4 text-xs text-slate-400 sm:text-sm">
-        <p className="font-medium text-slate-200">Next steps</p>
-        <ul className="mt-2 list-disc space-y-1 pl-4">
-          <li>Wire Line login to the “Login with Line” button in the header.</li>
-          <li>Create the sessions list and live court dashboard routes.</li>
-          <li>Add Supabase-powered data fetching with proper loading skeletons.</li>
-        </ul>
+      <section className="mt-2 rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-xs text-slate-400 sm:text-sm">
+        <p className="font-medium text-slate-200">Get started</p>
+        <p className="mt-2">
+          <a
+            href="/sessions"
+            className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-md bg-emerald-600 px-4 py-3 text-sm font-medium text-white hover:bg-emerald-500"
+          >
+            View sessions
+          </a>
+          {" "}— create a session, share the join link, and run the court dashboard.
+        </p>
       </section>
     </div>
   );

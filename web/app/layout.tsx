@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
@@ -19,6 +19,12 @@ export const metadata: Metadata = {
   title: "Badminton Pairing v2",
   description:
     "Run fair, fast badminton sessions with live court assignments and ratings.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#020617",
 };
 
 export default function RootLayout({
@@ -48,8 +54,11 @@ export default function RootLayout({
                     </span>
                   </div>
                 </div>
-                <nav className="flex items-center gap-4 text-xs sm:text-sm">
-                  <Link href="/sessions" className="text-slate-400 hover:text-slate-200 transition-colors">
+                <nav className="flex items-center gap-1 text-xs sm:text-sm">
+                  <Link
+                    href="/sessions"
+                    className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors"
+                  >
                     Sessions
                   </Link>
                   <HeaderAuth />

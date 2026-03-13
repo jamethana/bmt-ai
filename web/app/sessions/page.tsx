@@ -55,7 +55,7 @@ export default function SessionsPage() {
         </div>
         {user?.is_moderator && (
           <Link href="/sessions/new">
-            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+            <Button size="sm" className="min-h-[44px] h-11 bg-emerald-600 px-4 hover:bg-emerald-700 text-white">
               <Plus className="mr-1.5 h-3.5 w-3.5" />
               New Session
             </Button>
@@ -78,7 +78,7 @@ export default function SessionsPage() {
           <p className="text-sm text-slate-400">No sessions yet.</p>
           {user?.is_moderator && (
             <Link href="/sessions/new">
-              <Button size="sm" variant="outline" className="mt-3 border-slate-700">
+              <Button size="sm" variant="outline" className="mt-3 min-h-[44px] h-11 border-slate-700">
                 Create your first session
               </Button>
             </Link>

@@ -6,6 +6,7 @@ import { PlayerList } from "./PlayerList";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useAuth } from "@/src/ui/auth/AuthContext";
 import Link from "next/link";
 import { ChevronLeft, Users } from "lucide-react";
@@ -200,45 +201,45 @@ export function CourtDashboard({ sessionId }: { sessionId: string }) {
         <Button
           size="sm"
           variant="outline"
-          className="shrink-0 border-slate-700 text-slate-400 hover:text-slate-200"
-          onClick={() => setShowPlayers(!showPlayers)}
+          className="min-h-[44px] h-11 shrink-0 border-slate-700 text-slate-400 hover:text-slate-200"
+          onClick={() => setShowPlayers(true)}
         >
           <Users className="h-3.5 w-3.5 mr-1.5" />
           {players.filter(p => p.is_active).length}
         </Button>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_260px]">
-        {/* Courts grid */}
-        <div className="grid gap-4 sm:grid-cols-2">
-          {courts.map(n => (
-            <CourtCard
-              key={n}
-              courtNumber={n}
-              courtName={session.court_names?.[String(n)]}
-              pairing={getActivePairingForCourt(n)}
-              playerMap={playerMap}
-              isModerator={user?.is_moderator ?? false}
-              sessionId={sessionId}
-              onRefresh={loadData}
-            />
-          ))}
-        </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {courts.map(n => (
+          <CourtCard
+            key={n}
+            courtNumber={n}
+            courtName={session.court_names?.[String(n)]}
+            pairing={getActivePairingForCourt(n)}
+            playerMap={playerMap}
+            isModerator={user?.is_moderator ?? false}
+            sessionId={sessionId}
+            onRefresh={loadData}
+          />
+        ))}
+      </div>
 
-        {/* Player sidebar */}
-        {(showPlayers || window.innerWidth >= 1024) && (
-          <aside className="rounded-md border border-slate-800 bg-slate-900 p-4 h-fit space-y-3">
-            <h2 className="text-sm font-medium text-slate-300">
+      <Sheet open={showPlayers} onOpenChange={setShowPlayers}>
+        <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto border-slate-800 bg-slate-900">
+          <SheetHeader>
+            <SheetTitle className="text-slate-200">
               Players ({players.filter(p => p.is_active).length})
-            </h2>
+            </SheetTitle>
+          </SheetHeader>
+          <div className="mt-4">
             <PlayerList
               players={players}
               activePairingPlayerIds={activePairingPlayerIds}
               showSkillLevelPills={session.show_skill_level_pills}
             />
-          </aside>
-        )}
-      </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
