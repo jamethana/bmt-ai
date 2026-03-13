@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { requireAuth } from "@/src/infrastructure/auth/require-auth";
+import { requireAuth, getIsModeratorFromDb } from "@/src/infrastructure/auth/require-auth";
 import { createAdminClient } from "@/src/infrastructure/db/supabase-admin";
 import { apiSuccess, apiError } from "@/src/lib/api-response";
 import { generateRequestId } from "@/src/lib/request-id";
@@ -18,6 +18,8 @@ export async function POST(
   const requestId = generateRequestId();
   const session = await requireAuth();
   if (!session) return apiError("UNAUTHORIZED", "Not authenticated", requestId, 401);
+
+  const isModerator = await getIsModeratorFromDb(session);
 
   const { pairingId } = await params;
   const supabase = createAdminClient();
@@ -49,8 +51,8 @@ export async function POST(
   };
 
   const canRecord =
-    canRecordAnyResult({ isModerator: session.isModerator, session: sessionFlags }) ||
-    canRecordOwnResult({ isModerator: session.isModerator, session: sessionFlags, pairing: pairingPlayers, userId: session.userId });
+    canRecordAnyResult({ isModerator, session: sessionFlags }) ||
+    canRecordOwnResult({ isModerator, session: sessionFlags, pairing: pairingPlayers, userId: session.userId });
 
   if (!canRecord) {
     return apiError("FORBIDDEN", "Not allowed to record this result", requestId, 403);

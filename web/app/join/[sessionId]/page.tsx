@@ -57,8 +57,8 @@ export default function JoinSessionPage() {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
         <div className="space-y-3 text-center">
-          <Skeleton className="mx-auto h-8 w-48 bg-slate-800" />
-          <Skeleton className="mx-auto h-4 w-32 bg-slate-800" />
+          <Skeleton className="mx-auto h-8 w-48" />
+          <Skeleton className="mx-auto h-4 w-32" />
         </div>
       </div>
     );
@@ -66,31 +66,31 @@ export default function JoinSessionPage() {
 
   return (
     <div className="flex min-h-[40vh] items-center justify-center">
-      <div className="w-full max-w-sm space-y-6 rounded-xl border border-slate-800 bg-slate-900 p-6 text-center">
+      <div className="w-full max-w-sm space-y-6 rounded-xl border border-border bg-card p-6 text-center shadow-sm">
         <div className="space-y-1">
-          <h1 className="text-lg font-semibold text-slate-100">
+          <h1 className="text-lg font-semibold text-foreground">
             {sessionName ?? "Join Session"}
           </h1>
-          <p className="text-sm text-slate-400">
-            You&apos;re joining as <span className="text-slate-200">{user.display_name}</span>
+          <p className="text-sm text-muted-foreground">
+            You&apos;re joining as <span className="text-foreground font-medium">{user.display_name}</span>
           </p>
         </div>
 
         {status === "joined" ? (
-          <div className="rounded-md bg-emerald-500/20 p-3 text-sm text-emerald-400">
+          <div className="rounded-md bg-emerald-500/15 p-3 text-sm text-emerald-700">
             Joined! Redirecting to your match view…
           </div>
         ) : (
           <>
             {errorMsg && (
-              <div className="rounded-md border border-red-800 bg-red-900/20 p-3 text-sm text-red-400">
+              <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
                 {errorMsg}
               </div>
             )}
             <Button
               onClick={joinSession}
               disabled={status === "joining"}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="w-full"
             >
               {status === "joining" ? "Joining…" : "Join Session"}
             </Button>

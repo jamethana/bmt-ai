@@ -17,10 +17,10 @@ interface SessionRow {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  draft: "bg-slate-700 text-slate-200",
-  active: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-  completed: "bg-slate-800 text-slate-400",
-  cancelled: "bg-red-500/20 text-red-400 border-red-500/30",
+  draft: "bg-secondary text-secondary-foreground",
+  active: "bg-emerald-500/15 text-emerald-700 border-emerald-400/40",
+  completed: "bg-muted text-muted-foreground",
+  cancelled: "bg-destructive/10 text-destructive border-destructive/30",
 };
 
 export function SessionCard({ session }: { session: SessionRow }) {
@@ -34,30 +34,30 @@ export function SessionCard({ session }: { session: SessionRow }) {
 
   return (
     <Link href={`/sessions/${session.id}`} className="block">
-      <Card className="border-slate-800 bg-slate-900 transition-colors hover:border-slate-600 hover:bg-slate-800/80">
+      <Card className="border-border bg-card shadow-sm transition-shadow hover:shadow-md hover:border-primary/30">
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between gap-2">
-            <CardTitle className="text-base font-semibold text-slate-100">
+            <CardTitle className="text-base font-semibold text-foreground">
               {session.name}
             </CardTitle>
             <Badge className={`shrink-0 text-xs capitalize ${STATUS_COLORS[session.status] ?? STATUS_COLORS.draft}`}>
               {session.status}
             </Badge>
           </div>
-          <p className="text-sm text-slate-400">{dateLabel}</p>
+          <p className="text-sm text-muted-foreground">{dateLabel}</p>
         </CardHeader>
         <CardContent className="space-y-1.5">
-          <div className="flex items-center gap-1.5 text-xs text-slate-400">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Clock className="h-3.5 w-3.5" />
             <span>{session.start_time} – {session.end_time}</span>
           </div>
           {session.location && (
-            <div className="flex items-center gap-1.5 text-xs text-slate-400">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <MapPin className="h-3.5 w-3.5" />
               <span>{session.location}</span>
             </div>
           )}
-          <div className="flex items-center gap-1.5 text-xs text-slate-400">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Users className="h-3.5 w-3.5" />
             <span>{session.num_courts} courts · max {session.max_players} players</span>
           </div>

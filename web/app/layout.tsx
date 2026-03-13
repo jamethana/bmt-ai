@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#020617",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
@@ -35,29 +35,29 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-950 text-slate-50`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
         <AuthProvider>
-          <div className="min-h-screen bg-slate-950 text-slate-50">
-            <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur">
+          <div className="min-h-screen bg-background text-foreground">
+            <header className="border-b border-border bg-background/80 backdrop-blur sticky top-0 z-10">
               <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
                 <div className="flex items-center gap-2">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-emerald-500 text-sm font-bold text-slate-950">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-emerald-500 text-sm font-bold text-white">
                     BP
                   </span>
                   <div className="flex flex-col leading-tight">
-                    <span className="text-sm font-semibold">
-                      Badminton Pairing v2
+                    <span className="text-sm font-semibold text-foreground">
+                      Badminton Pairing
                     </span>
-                    <span className="text-xs text-slate-400">
-                      Session control for moderators
+                    <span className="text-xs text-muted-foreground">
+                      Session control
                     </span>
                   </div>
                 </div>
                 <nav className="flex items-center gap-1 text-xs sm:text-sm">
                   <Link
                     href="/sessions"
-                    className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors"
+                    className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors px-3"
                   >
                     Sessions
                   </Link>

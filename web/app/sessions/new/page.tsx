@@ -53,8 +53,8 @@ export default function NewSessionPage() {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="h-8 w-48 animate-pulse rounded bg-slate-800" />
-        <div className="h-64 w-full animate-pulse rounded bg-slate-800" />
+        <div className="h-8 w-48 animate-pulse rounded bg-muted" />
+        <div className="h-64 w-full animate-pulse rounded bg-muted" />
       </div>
     );
   }
@@ -64,12 +64,12 @@ export default function NewSessionPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/sessions" className="text-slate-400 hover:text-slate-200">
+        <Link href="/sessions" className="text-muted-foreground hover:text-foreground transition-colors">
           <ChevronLeft className="h-4 w-4" />
         </Link>
         <div>
-          <h1 className="text-xl font-semibold text-slate-100">New Session</h1>
-          <p className="text-sm text-slate-400">Create a new badminton session</p>
+          <h1 className="text-xl font-semibold text-foreground">New Session</h1>
+          <p className="text-sm text-muted-foreground">Create a new badminton session</p>
         </div>
       </div>
       <CreateSessionForm defaults={defaults} />

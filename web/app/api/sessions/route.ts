@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { requireAuth } from "@/src/infrastructure/auth/require-auth";
+import { requireAuth, requireModerator } from "@/src/infrastructure/auth/require-auth";
 import { createAdminClient } from "@/src/infrastructure/db/supabase-admin";
 import { apiSuccess, apiError } from "@/src/lib/api-response";
 import { generateRequestId } from "@/src/lib/request-id";
@@ -44,9 +44,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const requestId = generateRequestId();
-  const session = await requireAuth();
+  const { session, isModerator } = await requireModerator();
   if (!session) return apiError("UNAUTHORIZED", "Not authenticated", requestId, 401);
-  if (!session.isModerator) return apiError("FORBIDDEN", "Moderators only", requestId, 403);
+  if (!isModerator) return apiError("FORBIDDEN", "Moderators only", requestId, 403);
 
   const body = await req.json();
   const parsed = CreateSessionSchema.safeParse(body);

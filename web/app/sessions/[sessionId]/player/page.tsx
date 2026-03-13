@@ -98,9 +98,9 @@ export default function PlayerSessionPage() {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-8 w-48 bg-slate-800" />
-        <Skeleton className="h-32 w-full bg-slate-800" />
-        <Skeleton className="h-32 w-full bg-slate-800" />
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-32 w-full" />
       </div>
     );
   }
@@ -150,26 +150,26 @@ export default function PlayerSessionPage() {
   return (
     <div className="mx-auto max-w-lg space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/sessions" className="text-slate-400 hover:text-slate-200">
+        <Link href="/sessions" className="text-muted-foreground hover:text-foreground transition-colors">
           <ChevronLeft className="h-4 w-4" />
         </Link>
         <div>
-          <h1 className="text-lg font-semibold text-slate-100">{session.name}</h1>
-          <p className="text-sm text-slate-400">{session.date} · {session.start_time}</p>
+          <h1 className="text-lg font-semibold text-foreground">{session.name}</h1>
+          <p className="text-sm text-muted-foreground">{session.date} · {session.start_time}</p>
         </div>
       </div>
 
       {/* My next/current match */}
       <div>
-        <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-slate-500">My Match</h2>
+        <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">My Match</h2>
         {myActivePairing ? (
-          <Card className="border-slate-700 bg-slate-900">
+          <Card className="border-border bg-card shadow-sm">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-slate-200">
+                <CardTitle className="text-sm font-medium text-foreground">
                   {courtName(myActivePairing.court_number)}
                 </CardTitle>
-                <Badge className={`text-xs capitalize ${myActivePairing.status === "in_progress" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : "bg-slate-700 text-slate-300"}`}>
+                <Badge className={`text-xs capitalize ${myActivePairing.status === "in_progress" ? "bg-emerald-500/15 text-emerald-700 border-emerald-400/40" : "bg-secondary text-secondary-foreground"}`}>
                   {myActivePairing.status === "in_progress" ? (
                     <><Play className="mr-1 h-3 w-3 inline" /> Playing</>
                   ) : (
@@ -181,21 +181,21 @@ export default function PlayerSessionPage() {
             <CardContent>
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-md bg-emerald-500/10 p-2">
-                  <p className="text-xs text-emerald-500 mb-1 font-medium">Team A {getMyTeam(myActivePairing) === "A" && "(You)"}</p>
-                  <p className="text-xs text-slate-200">{playerName(myActivePairing.team_a_player1)}</p>
-                  <p className="text-xs text-slate-200">{playerName(myActivePairing.team_a_player2)}</p>
+                  <p className="text-xs text-emerald-700 mb-1 font-medium">Team A {getMyTeam(myActivePairing) === "A" && "(You)"}</p>
+                  <p className="text-xs text-foreground">{playerName(myActivePairing.team_a_player1)}</p>
+                  <p className="text-xs text-foreground">{playerName(myActivePairing.team_a_player2)}</p>
                 </div>
-                <div className="rounded-md bg-slate-800/60 p-2">
-                  <p className="text-xs text-slate-500 mb-1 font-medium">Team B {getMyTeam(myActivePairing) === "B" && "(You)"}</p>
-                  <p className="text-xs text-slate-200">{playerName(myActivePairing.team_b_player1)}</p>
-                  <p className="text-xs text-slate-200">{playerName(myActivePairing.team_b_player2)}</p>
+                <div className="rounded-md bg-secondary p-2">
+                  <p className="text-xs text-muted-foreground mb-1 font-medium">Team B {getMyTeam(myActivePairing) === "B" && "(You)"}</p>
+                  <p className="text-xs text-foreground">{playerName(myActivePairing.team_b_player1)}</p>
+                  <p className="text-xs text-foreground">{playerName(myActivePairing.team_b_player2)}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         ) : (
-          <div className="rounded-md border border-slate-800 bg-slate-900/50 p-4 text-center">
-            <p className="text-sm text-slate-400">You&apos;re sitting out. Waiting for next match assignment…</p>
+          <div className="rounded-md border border-border bg-card p-4 text-center shadow-sm">
+            <p className="text-sm text-muted-foreground">You&apos;re sitting out. Waiting for next match assignment…</p>
           </div>
         )}
       </div>
@@ -203,19 +203,19 @@ export default function PlayerSessionPage() {
       {/* Recent matches */}
       {myCompletedPairings.length > 0 && (
         <div>
-          <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-slate-500">Recent Matches</h2>
+          <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">Recent Matches</h2>
           <div className="space-y-2">
             {myCompletedPairings.map(p => {
               const won = didIWin(p);
               return (
-                <div key={p.id} className="flex items-center gap-3 rounded-md border border-slate-800 bg-slate-900 px-3 py-2">
-                  <div className={`h-2 w-2 rounded-full shrink-0 ${won === true ? "bg-emerald-500" : won === false ? "bg-red-500" : "bg-slate-600"}`} />
-                  <span className="text-xs text-slate-400 shrink-0">{courtName(p.court_number)}</span>
-                  <span className="flex-1 text-xs text-slate-300 truncate">
+                <div key={p.id} className="flex items-center gap-3 rounded-md border border-border bg-card px-3 py-2">
+                  <div className={`h-2 w-2 rounded-full shrink-0 ${won === true ? "bg-emerald-500" : won === false ? "bg-destructive" : "bg-muted-foreground/40"}`} />
+                  <span className="text-xs text-muted-foreground shrink-0">{courtName(p.court_number)}</span>
+                  <span className="flex-1 text-xs text-foreground truncate">
                     {playerName(p.team_a_player1)} / {playerName(p.team_a_player2)} vs {playerName(p.team_b_player1)} / {playerName(p.team_b_player2)}
                   </span>
                   {p.result && (
-                    <span className="shrink-0 text-xs font-medium text-slate-300">
+                    <span className="shrink-0 text-xs font-medium text-foreground">
                       {p.result.team_a_score}–{p.result.team_b_score}
                     </span>
                   )}

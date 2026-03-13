@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
       return apiError("DEPENDENCY_ERROR", "Invalid Line profile", requestId, 502);
     }
 
-    // Upsert user in DB
+    // Upsert user in DB (service_role key + GRANT on public.users required)
     const supabase = createAdminClient();
     const { data: user, error: upsertError } = await supabase
       .from("users")

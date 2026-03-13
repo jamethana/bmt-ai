@@ -50,12 +50,12 @@ export default function SessionsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-100">Sessions</h1>
-          <p className="text-sm text-slate-400">All badminton sessions</p>
+          <h1 className="text-xl font-semibold text-foreground">Sessions</h1>
+          <p className="text-sm text-muted-foreground">All badminton sessions</p>
         </div>
         {user?.is_moderator && (
           <Link href="/sessions/new">
-            <Button size="sm" className="min-h-[44px] h-11 bg-emerald-600 px-4 hover:bg-emerald-700 text-white">
+            <Button size="sm" className="min-h-[44px] h-11 px-4">
               <Plus className="mr-1.5 h-3.5 w-3.5" />
               New Session
             </Button>
@@ -64,7 +64,7 @@ export default function SessionsPage() {
       </div>
 
       {error && (
-        <div className="rounded-md border border-red-800 bg-red-900/20 p-4 text-sm text-red-400">
+        <div className="rounded-md border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
           {error}
         </div>
       )}
@@ -74,11 +74,12 @@ export default function SessionsPage() {
           {[1, 2, 3].map(i => <SessionCardSkeleton key={i} />)}
         </div>
       ) : sessions.length === 0 ? (
-        <div className="rounded-md border border-slate-800 bg-slate-900/50 p-8 text-center">
-          <p className="text-sm text-slate-400">No sessions yet.</p>
+        <div className="rounded-md border border-border bg-card p-8 text-center shadow-sm">
+          <p className="text-sm text-muted-foreground">No sessions yet.</p>
           {user?.is_moderator && (
-            <Link href="/sessions/new">
-              <Button size="sm" variant="outline" className="mt-3 min-h-[44px] h-11 border-slate-700">
+            <Link href="/sessions/new" className="inline-block mt-4">
+              <Button size="sm" className="min-h-[44px] h-11 px-4">
+                <Plus className="mr-1.5 h-3.5 w-3.5" />
                 Create your first session
               </Button>
             </Link>

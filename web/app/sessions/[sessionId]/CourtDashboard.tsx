@@ -155,9 +155,9 @@ export function CourtDashboard({ sessionId }: { sessionId: string }) {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-8 w-64 bg-slate-800" />
+        <Skeleton className="h-8 w-64" />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-40 bg-slate-800" />)}
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-40" />)}
         </div>
       </div>
     );
@@ -165,7 +165,7 @@ export function CourtDashboard({ sessionId }: { sessionId: string }) {
 
   if (!session) {
     return (
-      <div className="rounded-md border border-red-800 bg-red-900/20 p-4 text-sm text-red-400">
+      <div className="rounded-md border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
         Session not found.
       </div>
     );
@@ -173,27 +173,27 @@ export function CourtDashboard({ sessionId }: { sessionId: string }) {
 
   const courts = Array.from({ length: session.num_courts }, (_, i) => i + 1);
   const STATUS_COLORS: Record<string, string> = {
-    draft: "bg-slate-700 text-slate-200",
-    active: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-    completed: "bg-slate-800 text-slate-400",
-    cancelled: "bg-red-500/20 text-red-400",
+    draft: "bg-secondary text-secondary-foreground",
+    active: "bg-emerald-500/15 text-emerald-700 border-emerald-400/40",
+    completed: "bg-muted text-muted-foreground",
+    cancelled: "bg-destructive/10 text-destructive",
   };
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-start gap-3">
-        <Link href="/sessions" className="mt-1 text-slate-400 hover:text-slate-200">
+        <Link href="/sessions" className="mt-1 text-muted-foreground hover:text-foreground transition-colors">
           <ChevronLeft className="h-4 w-4" />
         </Link>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-xl font-semibold text-slate-100 truncate">{session.name}</h1>
+            <h1 className="text-xl font-semibold text-foreground truncate">{session.name}</h1>
             <Badge className={`text-xs capitalize ${STATUS_COLORS[session.status] ?? STATUS_COLORS.draft}`}>
               {session.status}
             </Badge>
           </div>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             {session.date} · {session.start_time}–{session.end_time}
             {session.location ? ` · ${session.location}` : ""}
           </p>
@@ -201,7 +201,7 @@ export function CourtDashboard({ sessionId }: { sessionId: string }) {
         <Button
           size="sm"
           variant="outline"
-          className="min-h-[44px] h-11 shrink-0 border-slate-700 text-slate-400 hover:text-slate-200"
+          className="min-h-[44px] h-11 shrink-0"
           onClick={() => setShowPlayers(true)}
         >
           <Users className="h-3.5 w-3.5 mr-1.5" />
@@ -225,9 +225,9 @@ export function CourtDashboard({ sessionId }: { sessionId: string }) {
       </div>
 
       <Sheet open={showPlayers} onOpenChange={setShowPlayers}>
-        <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto border-slate-800 bg-slate-900">
+        <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto border-border bg-card">
           <SheetHeader>
-            <SheetTitle className="text-slate-200">
+            <SheetTitle className="text-foreground">
               Players ({players.filter(p => p.is_active).length})
             </SheetTitle>
           </SheetHeader>

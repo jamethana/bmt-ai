@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
 interface DefaultSettings {
@@ -105,76 +105,71 @@ export function CreateSessionForm({ defaults }: { defaults?: DefaultSettings }) 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="rounded-md border border-red-800 bg-red-900/20 p-3 text-sm text-red-400">
+        <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
           {error}
         </div>
       )}
 
       {/* Basic Info */}
-      <div className="space-y-4 rounded-md border border-slate-800 bg-slate-900 p-4">
-        <h2 className="text-sm font-medium text-slate-300">Basic Info</h2>
+      <div className="space-y-4 rounded-md border border-border bg-card p-4 shadow-sm">
+        <h2 className="text-sm font-medium text-foreground">Basic Info</h2>
 
         <div className="space-y-1.5">
-          <Label htmlFor="name" className="text-xs text-slate-400">Session Name</Label>
+          <Label htmlFor="name" className="text-xs text-muted-foreground">Session Name</Label>
           <Input
             id="name"
             value={form.name}
             onChange={e => set("name", e.target.value)}
-            className="border-slate-700 bg-slate-800 text-slate-100"
             required
           />
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <div className="col-span-2 space-y-1.5 sm:col-span-1">
-            <Label htmlFor="date" className="text-xs text-slate-400">Date</Label>
+            <Label htmlFor="date" className="text-xs text-muted-foreground">Date</Label>
             <Input
               id="date"
               type="date"
               value={form.date}
               onChange={e => set("date", e.target.value)}
-              className="border-slate-700 bg-slate-800 text-slate-100"
               required
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="startTime" className="text-xs text-slate-400">Start</Label>
+            <Label htmlFor="startTime" className="text-xs text-muted-foreground">Start</Label>
             <Input
               id="startTime"
               type="time"
               value={form.startTime}
               onChange={e => set("startTime", e.target.value)}
-              className="border-slate-700 bg-slate-800 text-slate-100"
               required
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="endTime" className="text-xs text-slate-400">End</Label>
+            <Label htmlFor="endTime" className="text-xs text-muted-foreground">End</Label>
             <Input
               id="endTime"
               type="time"
               value={form.endTime}
               onChange={e => set("endTime", e.target.value)}
-              className="border-slate-700 bg-slate-800 text-slate-100"
               required
             />
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="location" className="text-xs text-slate-400">Location (optional)</Label>
+          <Label htmlFor="location" className="text-xs text-muted-foreground">Location (optional)</Label>
           <Input
             id="location"
             value={form.location}
             onChange={e => set("location", e.target.value)}
-            placeholder="e.g. Sports Hall A"
-            className="border-slate-700 bg-slate-800 text-slate-100"
+            placeholder="e.g. Sports Hall A…"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label htmlFor="numCourts" className="text-xs text-slate-400">Courts</Label>
+            <Label htmlFor="numCourts" className="text-xs text-muted-foreground">Courts</Label>
             <Input
               id="numCourts"
               type="number"
@@ -182,12 +177,11 @@ export function CreateSessionForm({ defaults }: { defaults?: DefaultSettings }) 
               max={20}
               value={form.numCourts}
               onChange={e => set("numCourts", Number(e.target.value))}
-              className="border-slate-700 bg-slate-800 text-slate-100"
               required
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="maxPlayers" className="text-xs text-slate-400">Max Players</Label>
+            <Label htmlFor="maxPlayers" className="text-xs text-muted-foreground">Max Players</Label>
             <Input
               id="maxPlayers"
               type="number"
@@ -195,44 +189,82 @@ export function CreateSessionForm({ defaults }: { defaults?: DefaultSettings }) 
               max={100}
               value={form.maxPlayers}
               onChange={e => set("maxPlayers", Number(e.target.value))}
-              className="border-slate-700 bg-slate-800 text-slate-100"
               required
             />
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="notes" className="text-xs text-slate-400">Notes (optional)</Label>
+          <Label htmlFor="notes" className="text-xs text-muted-foreground">Notes (optional)</Label>
           <Textarea
             id="notes"
             value={form.notes}
             onChange={e => set("notes", e.target.value)}
             rows={2}
-            className="border-slate-700 bg-slate-800 text-slate-100 resize-none"
+            className="resize-none"
           />
         </div>
       </div>
 
       {/* Pairing Settings */}
-      <div className="space-y-4 rounded-md border border-slate-800 bg-slate-900 p-4">
-        <h2 className="text-sm font-medium text-slate-300">Pairing Settings</h2>
+      <div className="space-y-4 rounded-md border border-border bg-card p-4">
+        <h2 className="text-sm font-medium text-foreground">Pairing Settings</h2>
+
+        <fieldset className="space-y-2">
+          <legend className="text-xs text-muted-foreground">
+            Pairing rule
+          </legend>
+          <p className="text-[11px] text-muted-foreground/80">
+            Choose how the system prioritises who plays next. Tap to switch.
+          </p>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3" aria-label="Pairing rule options">
+            {[
+              {
+                key: "balanced" as const,
+                label: "Balanced",
+                description: "Mix of wait time and fairness",
+              },
+              {
+                key: "least_played" as const,
+                label: "Least Played",
+                description: "Give games to those with fewer matches",
+              },
+              {
+                key: "longest_wait" as const,
+                label: "Longest Wait",
+                description: "Prioritise players waiting longest",
+              },
+            ].map(option => {
+              const isActive = form.pairingRule === option.key;
+              return (
+                <button
+                  key={option.key}
+                  type="button"
+                  role="radio"
+                  aria-checked={isActive}
+                  onClick={() => set("pairingRule", option.key)}
+                  className={cn(
+                    "min-h-[48px] rounded-lg border px-3 py-2 text-left text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                    "sm:min-h-[56px]",
+                    isActive
+                      ? "border-emerald-500 bg-emerald-500/10 text-emerald-900 dark:text-emerald-300"
+                      : "border-border bg-secondary/60 text-muted-foreground hover:bg-secondary"
+                  )}
+                >
+                  <span className={cn("block font-medium", isActive ? "text-emerald-700 dark:text-emerald-300" : "text-foreground")}>
+                    {option.label}
+                  </span>
+                  <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                    {option.description}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
 
         <div className="space-y-1.5">
-          <Label className="text-xs text-slate-400">Pairing Rule</Label>
-          <Select value={form.pairingRule} onValueChange={v => v && set("pairingRule", v)}>
-            <SelectTrigger className="border-slate-700 bg-slate-800 text-slate-100">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="border-slate-700 bg-slate-900">
-              <SelectItem value="balanced">Balanced (wait + fairness)</SelectItem>
-              <SelectItem value="least_played">Least Played (fairness-first)</SelectItem>
-              <SelectItem value="longest_wait">Longest Wait (wait-time-first)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="skillGap" className="text-xs text-slate-400">
+          <Label htmlFor="skillGap" className="text-xs text-muted-foreground">
             Max Partner Skill Gap (1–10, 10 = no restriction)
           </Label>
           <Input
@@ -242,14 +274,13 @@ export function CreateSessionForm({ defaults }: { defaults?: DefaultSettings }) 
             max={10}
             value={form.maxPartnerSkillLevelGap}
             onChange={e => set("maxPartnerSkillLevelGap", Number(e.target.value))}
-            className="border-slate-700 bg-slate-800 text-slate-100"
           />
         </div>
       </div>
 
       {/* Player Permissions */}
-      <div className="space-y-3 rounded-md border border-slate-800 bg-slate-900 p-4">
-        <h2 className="text-sm font-medium text-slate-300">Player Permissions</h2>
+      <div className="space-y-3 rounded-md border border-border bg-card p-4 shadow-sm">
+        <h2 className="text-sm font-medium text-foreground">Player Permissions</h2>
 
         {[
           { key: "allowPlayerAssignEmptyCourt" as const, label: "Allow players to assign themselves to empty courts" },
@@ -260,7 +291,7 @@ export function CreateSessionForm({ defaults }: { defaults?: DefaultSettings }) 
           { key: "showSkillLevelPills" as const, label: "Show skill level pills on player cards" },
         ].map(({ key, label }) => (
           <div key={key} className="flex items-center justify-between gap-4">
-            <Label htmlFor={key} className="text-xs text-slate-400 cursor-pointer">{label}</Label>
+            <Label htmlFor={key} className="text-xs text-muted-foreground cursor-pointer flex-1 min-w-0">{label}</Label>
             <Switch
               id={key}
               checked={form[key]}
@@ -273,17 +304,13 @@ export function CreateSessionForm({ defaults }: { defaults?: DefaultSettings }) 
       {/* Status + Submit */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Label className="text-xs text-slate-400">Save as Draft</Label>
+          <Label className="text-xs text-muted-foreground">Save as Draft</Label>
           <Switch
             checked={form.status === "draft"}
             onCheckedChange={v => set("status", v ? "draft" : "active")}
           />
         </div>
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white"
-        >
+        <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Creating…" : form.status === "draft" ? "Save Draft" : "Create & Activate"}
         </Button>
       </div>

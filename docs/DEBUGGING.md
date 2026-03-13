@@ -39,6 +39,36 @@ The `requestId` appears in:
 - Re-login via Line OAuth
 - Use `auth-debugger` subagent for systematic diagnosis
 
+### "Failed to create user" on Line login (DB error 42501)
+- **Symptom:** `/api/auth/callback` returns 500 with "Failed to create user". Logs show `dbMessage: "permission denied for table users"`, `dbCode: "42501"`.
+- **Cause:** The app uses `SUPABASE_SERVICE_ROLE_KEY` to upsert into `public.users`. Postgres denies the write if (1) the env var is missing or set to the **anon** key in Vercel, or (2) the `service_role` database role has no GRANT on `public.users`.
+- **Fix (env):** In Vercel → Project → Settings → Environment Variables, set `SUPABASE_SERVICE_ROLE_KEY` to the **service_role** secret from Supabase (Dashboard → Project Settings → API → "service_role" secret). Do not use the anon/public key. Redeploy after changing.
+- **Fix (DB grants):** If the key is correct but 42501 persists, the table may lack grants for the Supabase `service_role` role. In Supabase → SQL Editor run the [full grants block](#grant-service_role-access-to-all-app-tables) below, then retry.
+
+### Permission denied for table … (42501)
+If you see "permission denied for table sessions", "permission denied for table users", or similar, the Supabase `service_role` role lacks GRANTs on that table. The API uses the service role key for all DB access.
+
+**Grant service_role access to all app tables** — run once in Supabase → SQL Editor:
+```sql
+GRANT USAGE ON SCHEMA public TO service_role;
+GRANT SELECT, INSERT, UPDATE ON public.users TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.sessions TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.session_players TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.pairings TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.game_results TO service_role;
+```
+Then retry the failing action (login, sessions list, create session, etc.).
+
+### Grant moderator status to a user
+In Supabase → SQL Editor run (replace with the target user’s identifier):
+```sql
+-- By display name (use your Line display name):
+UPDATE public.users SET is_moderator = true WHERE display_name = 'Your Display Name';
+
+-- Or by user id (from Table Editor or: SELECT id, display_name FROM public.users;):
+-- UPDATE public.users SET is_moderator = true WHERE id = 'uuid-here';
+```
+
 ### Realtime not updating
 - Ensure Supabase Realtime is enabled for the table in the Supabase dashboard
 - Check RLS policies allow SELECT for the subscribing user
