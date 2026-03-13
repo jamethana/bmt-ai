@@ -76,9 +76,14 @@ export async function GET(req: NextRequest) {
     }
 
     const profile = await profileRes.json();
-    const lineUserId = profile.userId as string;
-    const displayName = profile.displayName as string;
+    const lineUserId = String(profile.userId ?? "").trim();
+    const displayName = String(profile.displayName ?? "Line User").trim() || "Line User";
     const pictureUrl = profile.pictureUrl as string | undefined;
+
+    if (!lineUserId) {
+      logger.error("Line profile missing userId", { requestId });
+      return apiError("DEPENDENCY_ERROR", "Invalid Line profile", requestId, 502);
+    }
 
     // Upsert user in DB
     const supabase = createAdminClient();
@@ -92,8 +97,22 @@ export async function GET(req: NextRequest) {
       .single();
 
     if (upsertError || !user) {
-      logger.error("User upsert failed", { requestId, errorCode: "INTERNAL_ERROR" });
-      return apiError("INTERNAL_ERROR", "Failed to create user", requestId, 500);
+      const dbMessage = upsertError?.message ?? "No rows returned";
+      const dbCode = upsertError?.code ?? "";
+      logger.error("User upsert failed", {
+        requestId,
+        errorCode: "INTERNAL_ERROR",
+        dbMessage,
+        dbCode,
+        hint: upsertError?.hint,
+      });
+      return apiError(
+        "INTERNAL_ERROR",
+        "Failed to create user",
+        requestId,
+        500,
+        process.env.NODE_ENV === "development" ? { dbError: dbMessage, dbCode } : undefined
+      );
     }
 
     const token = await createSessionToken({
