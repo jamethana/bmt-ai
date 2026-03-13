@@ -75,6 +75,7 @@ export default function PlayerSessionPage() {
   }, [sessionId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
 
     const channel = supabase

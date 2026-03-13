@@ -80,6 +80,7 @@ export function CourtDashboard({ sessionId }: { sessionId: string }) {
   }, [sessionId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
 
     // Realtime: pairings
