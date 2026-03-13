@@ -1,5 +1,4 @@
 {
-  "//": "Vercel project config for bmt (Next.js app lives in web/).",
   "framework": "nextjs",
   "installCommand": "cd web && npm install",
   "buildCommand": "cd web && npm run build",
@@ -10,4 +9,3 @@
     }
   }
 }
-
